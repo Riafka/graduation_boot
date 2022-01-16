@@ -5,6 +5,8 @@ import com.github.riafka.graduation_boot.repository.RestaurantMenuRepository;
 import com.github.riafka.graduation_boot.repository.RestaurantRepository;
 import com.github.riafka.graduation_boot.to.RestaurantMenuTo;
 import com.github.riafka.graduation_boot.util.RestaurantMenuUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ import static com.github.riafka.graduation_boot.util.validation.ValidationUtil.c
 @RequestMapping(value = AdminRestaurantMenuController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 @AllArgsConstructor
+@Tag(name = "Admin Restaurant Menu Controller", description = "Operations with restaurants menu for admin")
 public class AdminRestaurantMenuController {
     static final String REST_URL = "/api/admin/restaurants/{restaurant_id}/menus";
 
@@ -32,6 +35,7 @@ public class AdminRestaurantMenuController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete menu by restaurant_id and id")
     public void delete(@PathVariable int id, @PathVariable int restaurant_id) {
         log.info("delete restaurantMenu by restaurant_id{} and id {}", restaurant_id, id);
         repository.deleteExistedByRestaurantIdAndId(restaurant_id, id);
@@ -39,6 +43,7 @@ public class AdminRestaurantMenuController {
 
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete menus by restaurant_id")
     public void deleteByRestaurantId(@PathVariable int restaurant_id) {
         log.info("delete restaurantMenu by restaurant_id{}", restaurant_id);
         repository.deleteExistedByRestaurantId(restaurant_id);
@@ -46,6 +51,7 @@ public class AdminRestaurantMenuController {
 
     @Transactional
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create menu by restaurant_id")
     public ResponseEntity<RestaurantMenuTo> createWithLocation(@Valid @RequestBody RestaurantMenuTo restaurantMenuTo, @PathVariable int restaurant_id) {
         log.info("create {}", restaurantMenuTo);
         checkNew(restaurantMenuTo);
@@ -61,6 +67,7 @@ public class AdminRestaurantMenuController {
     @Transactional
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Update menu by restaurant_id and id")
     public void update(@Valid @RequestBody RestaurantMenuTo restaurantMenuTo, @PathVariable int id, @PathVariable int restaurant_id) {
         log.info("update {} with id={},restaurant_id={}", restaurantMenuTo, id, restaurant_id);
         assureIdConsistent(restaurantMenuTo, id);

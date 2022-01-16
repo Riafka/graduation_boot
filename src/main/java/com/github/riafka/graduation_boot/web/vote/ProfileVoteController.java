@@ -9,6 +9,8 @@ import com.github.riafka.graduation_boot.repository.VoteRepository;
 import com.github.riafka.graduation_boot.to.VoteTo;
 import com.github.riafka.graduation_boot.util.VoteUtil;
 import com.github.riafka.graduation_boot.web.AuthUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,7 @@ import static com.github.riafka.graduation_boot.util.validation.ValidationUtil.c
 @RequestMapping(value = ProfileVoteController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @AllArgsConstructor
 @Slf4j
+@Tag(name = "Profile Vote Controller", description = "Operations with own vote")
 public class ProfileVoteController {
     public static final String REST_URL = "/api/profile/vote";
     public static final String TIME_ERROR = "It is too late, vote can't be changed";
@@ -50,6 +53,7 @@ public class ProfileVoteController {
     }
 
     @GetMapping
+    @Operation(summary = "Get vote")
     public ResponseEntity<VoteTo> get(@AuthenticationPrincipal AuthUser authUser) {
         log.info("get vote for user {}", authUser.id());
         Optional<Vote> vote = voteRepository.findByUserIdAndDate(authUser.id(), LocalDate.now());
@@ -59,6 +63,7 @@ public class ProfileVoteController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Create vote by restaurant_id")
     public ResponseEntity<VoteTo> createWithLocation(@AuthenticationPrincipal AuthUser authUser, @RequestBody Integer restaurantId) {
         log.info("create vote User {} for restaurant {}", authUser.id(), restaurantId);
 
@@ -75,6 +80,7 @@ public class ProfileVoteController {
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
+    @Operation(summary = "Update vote by restaurant_id")
     public void update(@AuthenticationPrincipal AuthUser authUser, @RequestBody Integer restaurantId) {
 
         Optional<Restaurant> restaurant = restaurantRepository.findById(restaurantId);

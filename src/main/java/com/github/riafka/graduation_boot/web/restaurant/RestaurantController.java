@@ -4,6 +4,8 @@ import com.github.riafka.graduation_boot.model.Restaurant;
 import com.github.riafka.graduation_boot.repository.RestaurantRepository;
 import com.github.riafka.graduation_boot.to.RestaurantTo;
 import com.github.riafka.graduation_boot.util.RestaurantUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,6 +27,7 @@ import static com.github.riafka.graduation_boot.util.validation.ValidationUtil.c
 @RequestMapping(value = RestaurantController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 @AllArgsConstructor
+@Tag(name = "Restaurant Controller", description = "Operations with restaurants")
 public class RestaurantController {
     static final String REST_URL = "/api/restaurants";
 
@@ -32,6 +35,7 @@ public class RestaurantController {
 
     @GetMapping
     @Cacheable("restaurants")
+    @Operation(summary = "Get all restaurants")
     public List<RestaurantTo> getAll() {
         log.info("getAll restaurants");
         return repository.findAll(Sort.by(Sort.Direction.ASC, "name", "id"))
@@ -41,6 +45,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get restaurant by id")
     public ResponseEntity<RestaurantTo> get(@PathVariable int id) {
         log.info("get restaurant {}", id);
         Optional<Restaurant> restaurant = repository.findById(id);
@@ -49,6 +54,7 @@ public class RestaurantController {
     }
 
     @GetMapping("/menus")
+    @Operation(summary = "Get all restaurants with menu")
     public List<Restaurant> getAllWithMenu() {
         log.info("getAll restaurants with menu");
         return repository.getAllAllWithMenu();

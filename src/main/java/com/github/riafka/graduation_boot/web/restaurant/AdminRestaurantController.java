@@ -4,6 +4,8 @@ import com.github.riafka.graduation_boot.model.Restaurant;
 import com.github.riafka.graduation_boot.repository.RestaurantRepository;
 import com.github.riafka.graduation_boot.to.RestaurantTo;
 import com.github.riafka.graduation_boot.util.RestaurantUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,7 @@ import static com.github.riafka.graduation_boot.util.validation.ValidationUtil.c
 @RequestMapping(value = AdminRestaurantController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 @Slf4j
 @AllArgsConstructor
+@Tag(name = "Admin Restaurant Controller", description = "Operations with restaurants for admin")
 public class AdminRestaurantController {
     static final String REST_URL = "/api/admin/restaurants";
 
@@ -29,12 +32,14 @@ public class AdminRestaurantController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Delete restaurant by id")
     public void delete(@PathVariable int id) {
         log.info("delete restaurant {}", id);
         repository.deleteExisted(id);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Create restaurant")
     public ResponseEntity<RestaurantTo> createWithLocation(@Valid @RequestBody RestaurantTo restaurantTo) {
         log.info("create restaurant {}", restaurantTo);
         checkNew(restaurantTo);
@@ -47,6 +52,7 @@ public class AdminRestaurantController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Update restaurant by id")
     public void update(@Valid @RequestBody RestaurantTo restaurantTo, @PathVariable int id) {
         log.info("update {} with id={}", restaurantTo, id);
         assureIdConsistent(restaurantTo, id);
