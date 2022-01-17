@@ -10,6 +10,11 @@ import com.github.riafka.graduation_boot.to.VoteTo;
 import com.github.riafka.graduation_boot.util.VoteUtil;
 import com.github.riafka.graduation_boot.web.AuthUser;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,14 +66,21 @@ public class ProfileVoteController {
         return ResponseEntity.of(VoteUtil.mapTo(vote));
     }
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "{restaurant_id}")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create vote by restaurant_id")
-    public ResponseEntity<VoteTo> createWithLocation(@AuthenticationPrincipal AuthUser authUser, @RequestBody Integer restaurantId) {
-        log.info("create vote User {} for restaurant {}", authUser.id(), restaurantId);
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Vote created",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = VoteTo.class))}),
+            @ApiResponse(responseCode = "422", description = "{Restaurant not found, exception.vote.duplicateUserVoteDate}",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
+    public ResponseEntity<VoteTo> createWithLocation(@AuthenticationPrincipal AuthUser authUser,
+                                                     @PathVariable @Parameter(description = "id of the restaurant the user is voting for") Integer restaurant_id) {
+        log.info("create vote User {} for restaurant {}", authUser.id(), restaurant_id);
 
-        Optional<Restaurant> restaurant = restaurantRepository.findById(restaurantId);
-        checkRestaurantExists(restaurant, restaurantId);
+        Optional<Restaurant> restaurant = restaurantRepository.findById(restaurant_id);
+        checkRestaurantExists(restaurant, restaurant_id);
         Vote vote = new Vote(null, userRepository.getById(authUser.id()), restaurant.get(), LocalDate.now());
         Vote created = voteRepository.save(vote);
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -77,14 +89,20 @@ public class ProfileVoteController {
         return ResponseEntity.created(uriOfNewResource).body(VoteUtil.createTo(created));
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "{restaurant_id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
     @Operation(summary = "Update vote by restaurant_id")
-    public void update(@AuthenticationPrincipal AuthUser authUser, @RequestBody Integer restaurantId) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Vote updated",
+                    content = @Content),
+            @ApiResponse(responseCode = "422", description = "{Restaurant not found, It is too late, vote can't be changed}",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
+    public void update(@AuthenticationPrincipal AuthUser authUser,
+                       @PathVariable @Parameter(description = "id of the restaurant the user is voting for") Integer restaurant_id) {
 
-        Optional<Restaurant> restaurant = restaurantRepository.findById(restaurantId);
-        checkRestaurantExists(restaurant, restaurantId);
+        Optional<Restaurant> restaurant = restaurantRepository.findById(restaurant_id);
+        checkRestaurantExists(restaurant, restaurant_id);
 
         Optional<Vote> vote = voteRepository.findByUserIdAndDate(authUser.id(), LocalDate.now());
         Vote voteToSave;

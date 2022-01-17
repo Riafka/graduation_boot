@@ -47,9 +47,7 @@ class ProfileVoteControllerTest extends AbstractControllerTest {
     @WithUserDetails(value = USER_2_MAIL)
     void create() throws Exception {
         VoteTo newVoteTo = VoteTestData.getNew();
-        ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(JsonUtil.writeValue(newVoteTo.getRestaurantId())))
+        ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL + newVoteTo.getRestaurantId()))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
@@ -65,8 +63,7 @@ class ProfileVoteControllerTest extends AbstractControllerTest {
     void updateBeforeElevenHours() throws Exception {
         Clock clock = Clock.fixed(Instant.parse("2021-12-22T11:00:00.00Z"), ZoneId.of("UTC"));
         profileVoteController.setClock(clock);
-        perform(MockMvcRequestBuilders.put(REST_URL).contentType(MediaType.APPLICATION_JSON)
-                .content(JsonUtil.writeValue(MC_DONALDS_ID)))
+        perform(MockMvcRequestBuilders.put(REST_URL+MC_DONALDS_ID))
                 .andDo(print())
                 .andExpect(status().isNoContent());
         Vote updated = voteRepository.findByUserIdAndDate(USER_ID, LocalDate.now()).get();
@@ -78,8 +75,7 @@ class ProfileVoteControllerTest extends AbstractControllerTest {
     void updateAfterElevenHours() throws Exception {
         Clock clock = Clock.fixed(Instant.parse("2021-12-22T12:00:00.00Z"), ZoneId.of("UTC"));
         profileVoteController.setClock(clock);
-        perform(MockMvcRequestBuilders.put(REST_URL).contentType(MediaType.APPLICATION_JSON)
-                .content(JsonUtil.writeValue(MC_DONALDS_ID)))
+        perform(MockMvcRequestBuilders.put(REST_URL+MC_DONALDS_ID))
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().string(containsString(TIME_ERROR)));
@@ -108,9 +104,7 @@ class ProfileVoteControllerTest extends AbstractControllerTest {
     @Transactional(propagation = Propagation.NEVER)
     @WithUserDetails(value = USER_MAIL)
     void createDuplicate() throws Exception {
-        perform(MockMvcRequestBuilders.post(REST_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(JsonUtil.writeValue(KRUSTY_KRABS_ID)))
+        perform(MockMvcRequestBuilders.post(REST_URL + KRUSTY_KRABS_ID))
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().string(containsString(EXCEPTION_DUPLICATE_USER_VOTE_DATE)));
@@ -119,9 +113,7 @@ class ProfileVoteControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = USER_MAIL)
     void createNotFound() throws Exception {
-        perform(MockMvcRequestBuilders.post(REST_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(JsonUtil.writeValue(NOT_FOUND)))
+        perform(MockMvcRequestBuilders.post(REST_URL + NOT_FOUND))
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().string(containsString("Restaurant with id=" + NOT_FOUND + " not found")));
@@ -130,9 +122,7 @@ class ProfileVoteControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = USER_MAIL)
     void updateNotFound() throws Exception {
-        perform(MockMvcRequestBuilders.put(REST_URL)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(JsonUtil.writeValue(NOT_FOUND)))
+        perform(MockMvcRequestBuilders.put(REST_URL + NOT_FOUND))
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().string(containsString("Restaurant with id=" + NOT_FOUND + " not found")));

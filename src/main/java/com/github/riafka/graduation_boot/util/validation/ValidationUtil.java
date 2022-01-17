@@ -34,7 +34,7 @@ public class ValidationUtil {
         if (bean.isNew()) {
             bean.setId(id);
         } else if (bean.id() != id) {
-            throw new IllegalRequestDataException(bean.getClass().getSimpleName() + " must has id=" + id);
+            throw new IllegalRequestDataException(bean.getClass().getSimpleName() + " must have id=" + id);
         }
     }
 

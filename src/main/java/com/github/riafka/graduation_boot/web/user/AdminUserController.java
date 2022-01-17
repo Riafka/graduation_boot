@@ -1,7 +1,13 @@
 package com.github.riafka.graduation_boot.web.user;
 
 import com.github.riafka.graduation_boot.model.User;
+import com.github.riafka.graduation_boot.to.UserTo;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -30,7 +36,7 @@ public class AdminUserController extends AbstractUserController {
     @Override
     @GetMapping("/{id}")
     @Operation(summary = "Get user by id")
-    public ResponseEntity<User> get(@PathVariable int id) {
+    public ResponseEntity<User> get(@Parameter(description = "id of user to be searched") @PathVariable int id) {
         return super.get(id);
     }
 
@@ -38,7 +44,12 @@ public class AdminUserController extends AbstractUserController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete user by id")
-    public void delete(@PathVariable int id) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "User deleted",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "422", description = "User not found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
+    public void delete(@Parameter(description = "id of user to be deleted") @PathVariable int id) {
         super.delete(id);
     }
 
@@ -51,6 +62,12 @@ public class AdminUserController extends AbstractUserController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = UserTo.class))}),
+            @ApiResponse(responseCode = "422", description = "{User validation error, User must be new}",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
     public ResponseEntity<User> createWithLocation(@Valid @RequestBody User user) {
         log.info("create {}", user);
         checkNew(user);
@@ -64,7 +81,13 @@ public class AdminUserController extends AbstractUserController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Update user by id")
-    public void update(@Valid @RequestBody User user, @PathVariable int id) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "User updated",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "422", description = "{User must have id = {id}, User validation error}",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
+    public void update(@Valid @RequestBody User user,
+                       @Parameter(description = "id of user to be updated") @PathVariable int id) {
         log.info("update {} with id={}", user, id);
         assureIdConsistent(user, id);
         prepareAndSave(user);
@@ -72,7 +95,7 @@ public class AdminUserController extends AbstractUserController {
 
     @GetMapping("/by-email")
     @Operation(summary = "Get user by email")
-    public ResponseEntity<User> getByEmail(@RequestParam String email) {
+    public ResponseEntity<User> getByEmail(@RequestParam @Parameter(description = "email of user to be searched") String email) {
         log.info("getByEmail {}", email);
         return ResponseEntity.of(repository.findByEmailIgnoreCase(email));
     }
@@ -81,7 +104,12 @@ public class AdminUserController extends AbstractUserController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
     @Operation(summary = "Enable/disable user by id")
-    public void enable(@PathVariable int id, @RequestParam boolean enabled) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "User updated",
+                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "422", description = "User not found",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
+    public void enable(@Parameter(description = "id of user to be updated") @PathVariable int id, @RequestParam boolean enabled) {
         log.info(enabled ? "enable {}" : "disable {}", id);
         User user = repository.getById(id);
         user.setEnabled(enabled);

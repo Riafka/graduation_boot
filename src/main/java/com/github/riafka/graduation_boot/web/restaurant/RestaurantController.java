@@ -5,6 +5,7 @@ import com.github.riafka.graduation_boot.repository.RestaurantRepository;
 import com.github.riafka.graduation_boot.to.RestaurantTo;
 import com.github.riafka.graduation_boot.util.RestaurantUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class RestaurantController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get restaurant by id")
-    public ResponseEntity<RestaurantTo> get(@PathVariable int id) {
+    public ResponseEntity<RestaurantTo> get(@PathVariable @Parameter(description = "id of restaurant to be searched") int id) {
         log.info("get restaurant {}", id);
         Optional<Restaurant> restaurant = repository.findById(id);
         checkNotFoundWithId(restaurant.isPresent(), id);
