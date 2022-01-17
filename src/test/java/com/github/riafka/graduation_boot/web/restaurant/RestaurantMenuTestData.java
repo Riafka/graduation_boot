@@ -11,9 +11,6 @@ import java.util.List;
 import static com.github.riafka.graduation_boot.web.restaurant.RestaurantTestData.*;
 
 public class RestaurantMenuTestData {
-    public static final MatcherFactory.Matcher<RestaurantMenu> RESTAURANT_MENU_MATCHER =
-            MatcherFactory.usingIgnoringFieldsComparator(RestaurantMenu.class, "restaurant");
-
     public static final MatcherFactory.Matcher<RestaurantMenuTo> RESTAURANT_MENU_TO_MATCHER = MatcherFactory.usingEqualsComparator(RestaurantMenuTo.class);
 
     public static final int OYSTERS_ID = 1;
@@ -75,14 +72,14 @@ public class RestaurantMenuTestData {
     public static final Restaurant sulikoWithMenu = new Restaurant(SULIKO_ID, "Suliko", List.of(khachapuriInAdjarianStyle, khachapuriInImeretianStyle, khinkali));
 
     public static RestaurantMenuTo getNew() {
-        return new RestaurantMenuTo(null, "NewMeal", BLUE_LAGOON_ID, 50000, LocalDate.now());
+        return new RestaurantMenuTo(null, "NewMeal", BLUE_LAGOON_ID, "500.00", LocalDate.now());
     }
 
     public static RestaurantMenuTo getUpdated() {
-        return new RestaurantMenuTo(1, "UpdatedMeal", BLUE_LAGOON_ID, 40000, LocalDate.now());
+        return new RestaurantMenuTo(1, "UpdatedMeal", BLUE_LAGOON_ID, "400.00", LocalDate.now());
     }
 
     public static RestaurantMenuTo getInvalid() {
-        return new RestaurantMenuTo(1, "Tasty desert", BLUE_LAGOON_ID, 40000, LocalDate.now());
+        return new RestaurantMenuTo(1, "Tasty desert", BLUE_LAGOON_ID, "400.00", LocalDate.now());
     }
 }

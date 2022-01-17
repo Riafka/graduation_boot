@@ -1,6 +1,8 @@
 package com.github.riafka.graduation_boot.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.riafka.graduation_boot.util.RestaurantMenuUtils;
 import lombok.*;
 
 import javax.persistence.*;
@@ -33,5 +35,15 @@ public class RestaurantMenu extends NamedEntity {
         this.restaurant = restaurant;
         this.price = price;
         this.menuDate = menuDate;
+    }
+
+    @JsonProperty
+    public String getPrice() {
+        return RestaurantMenuUtils.formatPriceToString(price);
+    }
+
+    @JsonProperty
+    public void setPrice(String price) {
+        this.price = RestaurantMenuUtils.formatStringToPrice(price);
     }
 }

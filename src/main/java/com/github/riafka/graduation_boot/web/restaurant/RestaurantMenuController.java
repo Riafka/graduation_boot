@@ -2,6 +2,8 @@ package com.github.riafka.graduation_boot.web.restaurant;
 
 import com.github.riafka.graduation_boot.model.RestaurantMenu;
 import com.github.riafka.graduation_boot.repository.RestaurantMenuRepository;
+import com.github.riafka.graduation_boot.to.RestaurantMenuTo;
+import com.github.riafka.graduation_boot.util.RestaurantMenuUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.github.riafka.graduation_boot.util.validation.ValidationUtil.checkNotFound;
 
@@ -30,19 +33,22 @@ public class RestaurantMenuController {
 
     @GetMapping("/{restaurant_id}/menus/{id}")
     @Operation(summary = "Get menu by restaurant_id and id")
-    public ResponseEntity<RestaurantMenu> get(@PathVariable @Parameter(description = "id of restaurant by which menu is searched") int restaurant_id,
-                                              @PathVariable @Parameter(description = "id of menu to be searched") int id) {
+    public ResponseEntity<RestaurantMenuTo> get(@PathVariable @Parameter(description = "id of restaurant by which menu is searched") int restaurant_id,
+                                                @PathVariable @Parameter(description = "id of menu to be searched") int id) {
         log.info("get restaurantMenu by restaurant_id={}, id={}", restaurant_id, id);
         Optional<RestaurantMenu> restaurantMenu = repository.get(id, restaurant_id);
         checkNotFound(restaurantMenu.isPresent(), "restaurant_id=" + restaurant_id + " id=" + id);
-        return ResponseEntity.of(repository.get(id, restaurant_id));
+        return ResponseEntity.of(RestaurantMenuUtils.mapTo(repository.get(id, restaurant_id)));
     }
 
     @GetMapping("/{restaurant_id}/menus")
     @Cacheable("restaurant_menus")
     @Operation(summary = "Get menus by restaurant_id")
-    public List<RestaurantMenu> getByRestaurantId(@PathVariable @Parameter(description = "id of restaurant by which menus is searched") int restaurant_id) {
+    public List<RestaurantMenuTo> getByRestaurantId(@PathVariable @Parameter(description = "id of restaurant by which menus is searched") int restaurant_id) {
         log.info("get restaurantMenu by restaurant_id={}", restaurant_id);
-        return repository.getAllByRestaurantId(restaurant_id);
+        return repository.getAllByRestaurantId(restaurant_id)
+                .stream()
+                .map(RestaurantMenuUtils::createTo)
+                .collect(Collectors.toList());
     }
 }
