@@ -75,7 +75,7 @@ public class AdminRestaurantMenuController {
             @ApiResponse(responseCode = "201", description = "Menu created",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = RestaurantMenuTo.class))}),
-            @ApiResponse(responseCode = "422", description = "{Menu validation error, Menu must be new}",
+            @ApiResponse(responseCode = "422", description = "{Menu validation error, Menu must be new, Incorrect format for price}",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
     public ResponseEntity<RestaurantMenuTo> createWithLocation(@Valid @RequestBody RestaurantMenuTo restaurantMenuTo,
                                                                @Parameter(description = "id of the restaurant for which the menu will be created")
@@ -100,7 +100,7 @@ public class AdminRestaurantMenuController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "409", description = "Menu doesn't belong to restaurant",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
-            @ApiResponse(responseCode = "422", description = "Menu validation error",
+            @ApiResponse(responseCode = "422", description = "{Menu validation error, Incorrect format for price}",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
     public void update(@Valid @RequestBody RestaurantMenuTo restaurantMenuTo,
                        @Parameter(description = "id of menu to be updated") @PathVariable int id,

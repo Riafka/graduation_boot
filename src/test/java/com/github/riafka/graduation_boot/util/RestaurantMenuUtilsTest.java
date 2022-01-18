@@ -7,11 +7,12 @@ class RestaurantMenuUtilsTest {
 
     @Test
     void formatPriceToString() {
-        Assertions.assertEquals("100.20", RestaurantMenuUtils.formatPriceToString(10020L));
+        Assertions.assertEquals("1" + (char) 160 + "000,20", RestaurantMenuUtils.formatPriceToString(100020L));
     }
 
     @Test
     void formatStringToPrice() {
-        Assertions.assertEquals(3030L, RestaurantMenuUtils.formatStringToPrice("30.30"));
+        Assertions.assertEquals(100040L, RestaurantMenuUtils.formatStringToPrice("1 000,40"));
+        Assertions.assertEquals(100040L, RestaurantMenuUtils.formatStringToPrice("1 000,40"));
     }
 }
