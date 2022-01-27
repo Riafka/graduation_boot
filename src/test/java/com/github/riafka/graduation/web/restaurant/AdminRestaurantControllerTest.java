@@ -1,9 +1,8 @@
 package com.github.riafka.graduation.web.restaurant;
 
+import com.github.riafka.graduation.model.Restaurant;
 import com.github.riafka.graduation.repository.RestaurantRepository;
-import com.github.riafka.graduation.to.RestaurantTo;
 import com.github.riafka.graduation.util.JsonUtil;
-import com.github.riafka.graduation.util.RestaurantUtil;
 import com.github.riafka.graduation.web.AbstractControllerTest;
 import com.github.riafka.graduation.web.user.UserTestData;
 import org.junit.jupiter.api.Test;
@@ -62,24 +61,24 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
     void createWithLocation() throws Exception {
-        RestaurantTo newRestaurant = getNew();
+        Restaurant newRestaurant = getNew();
         ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(newRestaurant)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        RestaurantTo created = RESTAURANT_TO_MATCHER.readFromJson(action);
+        Restaurant created = RESTAURANT_MATCHER.readFromJson(action);
         int newId = created.id();
         newRestaurant.setId(newId);
-        RESTAURANT_TO_MATCHER.assertMatch(created, newRestaurant);
-        RESTAURANT_TO_MATCHER.assertMatch(RestaurantUtil.createTo(restaurantRepository.getById(newId)), newRestaurant);
+        RESTAURANT_MATCHER.assertMatch(created, newRestaurant);
+        RESTAURANT_MATCHER.assertMatch(restaurantRepository.getById(newId), newRestaurant);
     }
 
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
     void createInvalid() throws Exception {
-        RestaurantTo invalid = new RestaurantTo(null, "");
+        Restaurant invalid = new Restaurant(null, "", null);
         perform(MockMvcRequestBuilders.post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(invalid)))
@@ -89,20 +88,20 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
     void update() throws Exception {
-        RestaurantTo updated = getUpdated();
+        Restaurant updated = getUpdated();
         perform(MockMvcRequestBuilders.put(REST_URL + BLUE_LAGOON_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(updated)))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
-        RESTAURANT_TO_MATCHER.assertMatch(RestaurantUtil.createTo(restaurantRepository.getById(BLUE_LAGOON_ID)), getUpdated());
+        RESTAURANT_MATCHER.assertMatch(restaurantRepository.getById(BLUE_LAGOON_ID), getUpdated());
     }
 
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
     void updateInvalid() throws Exception {
-        RestaurantTo updated = getUpdated();
+        Restaurant updated = getUpdated();
         updated.setName("");
         perform(MockMvcRequestBuilders.put(REST_URL + BLUE_LAGOON_ID)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -115,7 +114,7 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
     @Transactional(propagation = Propagation.NEVER)
     @WithUserDetails(value = ADMIN_MAIL)
     void updateDuplicate() throws Exception {
-        RestaurantTo invalid = getUpdated();
+        Restaurant invalid = getUpdated();
         invalid.setName("Suliko");
         perform(MockMvcRequestBuilders.put(REST_URL + BLUE_LAGOON_ID)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -129,7 +128,7 @@ class AdminRestaurantControllerTest extends AbstractControllerTest {
     @Transactional(propagation = Propagation.NEVER)
     @WithUserDetails(value = ADMIN_MAIL)
     void createDuplicate() throws Exception {
-        RestaurantTo invalid = new RestaurantTo(null, "Suliko");
+        Restaurant invalid = new Restaurant(null, "Suliko", null);
         perform(MockMvcRequestBuilders.post(REST_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(invalid)))

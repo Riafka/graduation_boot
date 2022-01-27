@@ -2,15 +2,19 @@ package com.github.riafka.graduation.web.restaurant;
 
 import com.github.riafka.graduation.model.Restaurant;
 import com.github.riafka.graduation.to.RestaurantTo;
-import com.github.riafka.graduation.util.RestaurantUtil;
 import com.github.riafka.graduation.web.MatcherFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RestaurantTestData {
-    public static final MatcherFactory.Matcher<RestaurantTo> RESTAURANT_TO_MATCHER = MatcherFactory.usingEqualsComparator(RestaurantTo.class);
-    public static final MatcherFactory.Matcher<Restaurant> RESTAURANT_WITH_MENUS_MATCHER = //MatcherFactory.usingIgnoringFieldsComparator(Restaurant.class);
-            MatcherFactory.usingAssertions(Restaurant.class,
+    public static final MatcherFactory.Matcher<Restaurant> RESTAURANT_MATCHER;
+
+    static {
+        RESTAURANT_MATCHER = MatcherFactory.usingIgnoringFieldsComparator(Restaurant.class, "menuItems");
+    }
+
+    public static final MatcherFactory.Matcher<RestaurantTo> RESTAURANT_TO_MATCHER =
+            MatcherFactory.usingAssertions(RestaurantTo.class,
                     //     No need use ignoringAllOverriddenEquals, see https://assertj.github.io/doc/#breaking-changes
                     (a, e) -> assertThat(a).usingRecursiveComparison()
                             .ignoringFields("menuItems.restaurant").isEqualTo(e),
@@ -29,17 +33,11 @@ public class RestaurantTestData {
     public static final Restaurant riga = new Restaurant(RIGA_ID, "Riga", null);
     public static final Restaurant suliko = new Restaurant(SULIKO_ID, "Suliko", null);
 
-    public static final RestaurantTo blueLagoonTo = RestaurantUtil.createTo(blueLagoon);
-    public static final RestaurantTo mcDonaldsTo = RestaurantUtil.createTo(mcDonalds);
-    public static final RestaurantTo krustyKrabsTo = RestaurantUtil.createTo(krustyKrabs);
-    public static final RestaurantTo rigaTo = RestaurantUtil.createTo(riga);
-    public static final RestaurantTo sulikoTo = RestaurantUtil.createTo(suliko);
-
-    public static RestaurantTo getNew() {
-        return new RestaurantTo(null, "New");
+    public static Restaurant getNew() {
+        return new Restaurant(null, "New", null);
     }
 
-    public static RestaurantTo getUpdated() {
-        return new RestaurantTo(BLUE_LAGOON_ID, "UpdatedName");
+    public static Restaurant getUpdated() {
+        return new Restaurant(BLUE_LAGOON_ID, "UpdatedName", null);
     }
 }

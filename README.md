@@ -14,9 +14,17 @@ Voting system for deciding where to have lunch (without frontend).
 Each restaurant provides a new menu each day.
 
 Tech stack: Maven, Spring Boot 2.6.1, Spring Security, Spring Data JPA, REST (Jackson), JDK8/17, <br>
-Stream API, HSQLDB (in memory),  JUnit5, Swagger (API)
+Stream API, HSQLDB (in memory), JUnit5, Swagger (API)
 
-Login information:
+### How to init project
+
+You could run project by Git CMD or Linux Terminal:<br>
+cd [project_folder]<br>
+mvn clean install -DskipTests<br>
+java -jar target/graduation-0.0.1-SNAPSHOT.jar
+
+### Login information:
+
 * user@gmail.com / password
 * admin@gmail.com / admin
 

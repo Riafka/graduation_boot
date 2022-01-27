@@ -16,26 +16,26 @@ public interface RestaurantRepository extends BaseRepository<Restaurant> {
 
     @Override
     @Transactional
-    @CacheEvict(value = "restaurants", allEntries = true)
+    @CacheEvict(value = {"restaurants", "restaurants_with_menu"}, allEntries = true)
     Restaurant save(Restaurant restaurant);
 
     @Override
     @Transactional
-    @CacheEvict(value = "restaurants", allEntries = true)
+    @CacheEvict(value = {"restaurants", "restaurants_with_menu"}, allEntries = true)
     void delete(Restaurant restaurant);
 
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "restaurants", allEntries = true),
-            @CacheEvict(value = "menu_items"),
+            @CacheEvict(value = {"restaurants", "restaurants_with_menu"}, allEntries = true),
+            @CacheEvict(value = "menu_items")
     })
     void deleteById(Integer integer);
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "restaurants", allEntries = true),
-            @CacheEvict(value = "menu_items"),
+            @CacheEvict(value = {"restaurants", "restaurants_with_menu"}, allEntries = true),
+            @CacheEvict(value = "menu_items")
     })
     default void deleteExisted(int id) {
         BaseRepository.super.deleteExisted(id);

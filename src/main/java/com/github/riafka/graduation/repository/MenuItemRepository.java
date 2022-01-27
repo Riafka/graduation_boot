@@ -3,6 +3,7 @@ package com.github.riafka.graduation.repository;
 import com.github.riafka.graduation.error.DataConflictException;
 import com.github.riafka.graduation.model.MenuItem;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,22 +19,34 @@ public interface MenuItemRepository extends BaseRepository<MenuItem> {
 
     @Transactional
     @Modifying
-    @CacheEvict(value = "menu_items")
-    @Query("DELETE FROM MenuItem rm WHERE rm.restaurant.id=:id AND rm.menuDate=:date")
-    int deleteByRestaurantIdAndDate(int id, LocalDate date);
+    @Caching(evict = {
+            @CacheEvict(value = "menu_items", key = "#restaurantId"),
+            @CacheEvict(value = "restaurants_with_menu", allEntries = true)
+    })
+    @Query("DELETE FROM MenuItem rm WHERE rm.restaurant.id=:restaurantId AND rm.menuDate=:date")
+    int deleteByRestaurantIdAndDate(int restaurantId, LocalDate date);
 
     @Transactional
     @Modifying
-    @CacheEvict(value = "menu_items", key = "#restaurantId")
+    @Caching(evict = {
+            @CacheEvict(value = "menu_items", key = "#restaurantId"),
+            @CacheEvict(value = "restaurants_with_menu", allEntries = true)
+    })
     @Query("DELETE FROM MenuItem rm WHERE rm.restaurant.id=:restaurantId AND rm.id=:id")
     int deleteByRestaurantIdAndId(int restaurantId, int id);
 
-    @CacheEvict(value = "menu_items")
-    default void deleteExistedByRestaurantIdAndDate(int id, LocalDate date) {
-        checkModification(deleteByRestaurantIdAndDate(id, date), id);
+    @Caching(evict = {
+            @CacheEvict(value = "menu_items", key = "#restaurantId"),
+            @CacheEvict(value = "restaurants_with_menu", allEntries = true)
+    })
+    default void deleteExistedByRestaurantIdAndDate(int restaurantId, LocalDate date) {
+        checkModification(deleteByRestaurantIdAndDate(restaurantId, date), restaurantId);
     }
 
-    @CacheEvict(value = "menu_items", key = "#restaurantId")
+    @Caching(evict = {
+            @CacheEvict(value = "menu_items", key = "#restaurantId"),
+            @CacheEvict(value = "restaurants_with_menu", allEntries = true)
+    })
     default void deleteExistedByRestaurantIdAndId(int restaurantId, int id) {
         checkModification(deleteByRestaurantIdAndId(restaurantId, id), id);
     }
@@ -54,11 +67,17 @@ public interface MenuItemRepository extends BaseRepository<MenuItem> {
 
     @Override
     @Transactional
-    @CacheEvict(value = "menu_items", key = "#menuItem.restaurant.getId()")
+    @Caching(evict = {
+            @CacheEvict(value = "menu_items", key = "#menuItem.restaurant.getId()"),
+            @CacheEvict(value = "restaurants_with_menu", allEntries = true)
+    })
     MenuItem save(MenuItem menuItem);
 
     @Override
     @Transactional
-    @CacheEvict(value = "menu_items", key = "#menuItem.restaurant.getId()")
+    @Caching(evict = {
+            @CacheEvict(value = "menu_items", key = "#menuItem.restaurant.getId()"),
+            @CacheEvict(value = "restaurants_with_menu", allEntries = true)
+    })
     void delete(MenuItem menuItem);
 }

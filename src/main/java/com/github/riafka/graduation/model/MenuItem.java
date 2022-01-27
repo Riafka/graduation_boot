@@ -15,7 +15,6 @@ import java.time.LocalDate;
 @ToString(callSuper = true)
 public class MenuItem extends NamedEntity {
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
     @JsonBackReference

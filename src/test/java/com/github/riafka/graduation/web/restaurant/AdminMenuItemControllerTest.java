@@ -1,9 +1,8 @@
 package com.github.riafka.graduation.web.restaurant;
 
+import com.github.riafka.graduation.model.MenuItem;
 import com.github.riafka.graduation.repository.MenuItemRepository;
-import com.github.riafka.graduation.to.MenuItemTo;
 import com.github.riafka.graduation.util.JsonUtil;
-import com.github.riafka.graduation.util.MenuItemUtil;
 import com.github.riafka.graduation.web.AbstractControllerTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
-import static com.github.riafka.graduation.util.MenuItemUtil.createTo;
 import static com.github.riafka.graduation.web.GlobalExceptionHandler.EXCEPTION_DUPLICATE_NAME_DATE;
 import static com.github.riafka.graduation.web.restaurant.AdminMenuItemController.REST_URL_WITHOUT_ID;
 import static com.github.riafka.graduation.web.restaurant.MenuItemTestData.*;
@@ -56,38 +54,38 @@ class AdminMenuItemControllerTest extends AbstractControllerTest {
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
     void createWithLocation() throws Exception {
-        MenuItemTo newRestaurantMenu = getNew();
-        ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL + REST_URL_WITHOUT_ID)
+        MenuItem newRestaurantMenu = getNew();
+        ResultActions action = perform(MockMvcRequestBuilders.post(REST_URL + BLUE_LAGOON_ID + REST_URL_WITHOUT_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(newRestaurantMenu)))
                 .andDo(print())
                 .andExpect(status().isCreated());
 
-        MenuItemTo created = MENU_ITEM_TO_MATCHER.readFromJson(action);
+        MenuItem created = MENU_ITEM_MATCHER.readFromJson(action);
         int newId = created.id();
         newRestaurantMenu.setId(newId);
-        MENU_ITEM_TO_MATCHER.assertMatch(created, newRestaurantMenu);
-        MENU_ITEM_TO_MATCHER.assertMatch(MenuItemUtil.createTo(repository.getById(newId)), newRestaurantMenu);
+        MENU_ITEM_MATCHER.assertMatch(created, newRestaurantMenu);
+        MENU_ITEM_MATCHER.assertMatch(repository.getById(newId), newRestaurantMenu);
     }
 
     @Test
     @WithUserDetails(value = ADMIN_MAIL)
     void update() throws Exception {
-        MenuItemTo updated = getUpdated();
+        MenuItem updated = getUpdated();
         perform(MockMvcRequestBuilders.put(REST_URL + BLUE_LAGOON_ID + "/menu_items/" + OYSTERS_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(updated)))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
-        MENU_ITEM_TO_MATCHER.assertMatch(MenuItemUtil.createTo(repository.getById(OYSTERS_ID)), getUpdated());
+        MENU_ITEM_MATCHER.assertMatch(repository.getById(OYSTERS_ID), getUpdated());
     }
 
     @Test
     @Transactional(propagation = Propagation.NEVER)
     @WithUserDetails(value = ADMIN_MAIL)
     void updateDuplicate() throws Exception {
-        MenuItemTo invalid = getInvalid();
+        MenuItem invalid = getInvalid();
         perform(MockMvcRequestBuilders.put(REST_URL + BLUE_LAGOON_ID + "/menu_items/" + OYSTERS_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(invalid)))
@@ -100,9 +98,9 @@ class AdminMenuItemControllerTest extends AbstractControllerTest {
     @Transactional(propagation = Propagation.NEVER)
     @WithUserDetails(value = ADMIN_MAIL)
     void createDuplicate() throws Exception {
-        MenuItemTo invalid = getInvalid();
+        MenuItem invalid = getInvalid();
         invalid.setId(null);
-        perform(MockMvcRequestBuilders.post(REST_URL + REST_URL_WITHOUT_ID)
+        perform(MockMvcRequestBuilders.post(REST_URL + BLUE_LAGOON_ID + REST_URL_WITHOUT_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(invalid)))
                 .andDo(print())
@@ -118,7 +116,7 @@ class AdminMenuItemControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 // https://jira.spring.io/browse/SPR-14472
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MENU_ITEM_TO_MATCHER.contentJson(createTo(redWineTwoDaysOld)));
+                .andExpect(MENU_ITEM_MATCHER.contentJson(redWineTwoDaysOld));
     }
 
     @Test
@@ -130,9 +128,6 @@ class AdminMenuItemControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 // https://jira.spring.io/browse/SPR-14472
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MENU_ITEM_TO_MATCHER.contentJson(
-                        createTo(redWineTwoDaysOld),
-                        createTo(salmonWithLemonTwoDaysOld),
-                        createTo(tastyDesertTwoDaysOld)));
+                .andExpect(MENU_ITEM_MATCHER.contentJson(redWineTwoDaysOld, salmonWithLemonTwoDaysOld, tastyDesertTwoDaysOld));
     }
 }

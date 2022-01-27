@@ -6,7 +6,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static com.github.riafka.graduation.util.MenuItemUtil.createTo;
 import static com.github.riafka.graduation.web.restaurant.MenuItemTestData.*;
 import static com.github.riafka.graduation.web.restaurant.RestaurantTestData.BLUE_LAGOON_ID;
 import static com.github.riafka.graduation.web.user.UserTestData.USER_MAIL;
@@ -25,7 +24,7 @@ class MenuItemControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 // https://jira.spring.io/browse/SPR-14472
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MENU_ITEM_TO_MATCHER.contentJson(createTo(redWine)));
+                .andExpect(MENU_ITEM_MATCHER.contentJson(redWine));
     }
 
     @Test
@@ -46,10 +45,6 @@ class MenuItemControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 // https://jira.spring.io/browse/SPR-14472
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MENU_ITEM_TO_MATCHER.contentJson(createTo(friedSquid),
-                        createTo(oysters),
-                        createTo(redWine),
-                        createTo(salmonWithLemon),
-                        createTo(tastyDesert)));
+                .andExpect(MENU_ITEM_MATCHER.contentJson(friedSquid, oysters, redWine, salmonWithLemon, tastyDesert));
     }
 }

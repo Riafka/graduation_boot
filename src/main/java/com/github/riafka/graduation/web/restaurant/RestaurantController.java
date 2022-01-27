@@ -31,24 +31,24 @@ public class RestaurantController extends AbstractRestaurantController {
     @GetMapping
     @Cacheable("restaurants")
     @Operation(summary = "Get all restaurants")
-    public List<RestaurantTo> getAll() {
+    public List<Restaurant> getAll() {
         log.info("getAll restaurants");
-        return repository.findAll(Sort.by(Sort.Direction.ASC, "name"))
-                .stream()
-                .map(RestaurantUtil::createTo)
-                .collect(Collectors.toList());
+        return repository.findAll(Sort.by(Sort.Direction.ASC, "name"));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get restaurant by id")
-    public RestaurantTo get(@PathVariable @Parameter(description = "id of restaurant to be searched") int id) {
+    public Restaurant get(@PathVariable @Parameter(description = "id of restaurant to be searched") int id) {
         return super.get(id);
     }
 
     @GetMapping("/menu-for-today")
     @Operation(summary = "Get all restaurants with actual menu")
-    public List<Restaurant> getAllWithMenu() {
+    @Cacheable("restaurants_with_menu")
+    public List<RestaurantTo> getAllWithMenu() {
         log.info("getAll restaurants with menu");
-        return repository.getAllWithMenu(LocalDate.now());
+        return repository.getAllWithMenu(LocalDate.now()).stream()
+                .map(RestaurantUtil::createTo)
+                .collect(Collectors.toList());
     }
 }

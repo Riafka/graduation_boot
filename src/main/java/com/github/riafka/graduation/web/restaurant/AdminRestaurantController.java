@@ -1,8 +1,6 @@
 package com.github.riafka.graduation.web.restaurant;
 
 import com.github.riafka.graduation.model.Restaurant;
-import com.github.riafka.graduation.to.RestaurantTo;
-import com.github.riafka.graduation.util.RestaurantUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,9 +34,7 @@ public class AdminRestaurantController extends AbstractRestaurantController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete restaurant by id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Restaurant deleted",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = RestaurantTo.class))}),
+            @ApiResponse(responseCode = "204", description = "Restaurant deleted"),
             @ApiResponse(responseCode = "422", description = "Restaurant not found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
     public void delete(@Parameter(description = "id of restaurant to be deleted") @PathVariable int id) {
@@ -51,17 +47,17 @@ public class AdminRestaurantController extends AbstractRestaurantController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Restaurant created",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = RestaurantTo.class))}),
+                            schema = @Schema(implementation = Restaurant.class))}),
             @ApiResponse(responseCode = "422", description = "{Restaurant validation error, Restaurant must be new}",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
-    public ResponseEntity<RestaurantTo> createWithLocation(@Valid @RequestBody RestaurantTo restaurantTo) {
-        log.info("create restaurant {}", restaurantTo);
-        checkNew(restaurantTo);
-        Restaurant created = repository.save(RestaurantUtil.createFromTo(restaurantTo));
+    public ResponseEntity<Restaurant> createWithLocation(@Valid @RequestBody Restaurant restaurant) {
+        log.info("create restaurant {}", restaurant);
+        checkNew(restaurant);
+        Restaurant created = repository.save(restaurant);
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path(RestaurantController.REST_URL + "/{id}")
                 .buildAndExpand(created.getId()).toUri();
-        return ResponseEntity.created(uriOfNewResource).body(RestaurantUtil.createTo(created));
+        return ResponseEntity.created(uriOfNewResource).body(created);
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -72,16 +68,16 @@ public class AdminRestaurantController extends AbstractRestaurantController {
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)}),
             @ApiResponse(responseCode = "422", description = "Restaurant validation error",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
-    public void update(@Valid @RequestBody RestaurantTo restaurantTo,
+    public void update(@Valid @RequestBody Restaurant restaurant,
                        @PathVariable @Parameter(description = "id of restaurant to be updated") int id) {
-        log.info("update {} with id={}", restaurantTo, id);
-        assureIdConsistent(restaurantTo, id);
-        repository.save(RestaurantUtil.createFromTo(restaurantTo));
+        log.info("update {} with id={}", restaurant, id);
+        assureIdConsistent(restaurant, id);
+        repository.save(restaurant);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get restaurant by id")
-    public RestaurantTo get(@PathVariable @Parameter(description = "id of restaurant to be searched") int id) {
+    public Restaurant get(@PathVariable @Parameter(description = "id of restaurant to be searched") int id) {
         return super.get(id);
     }
 }

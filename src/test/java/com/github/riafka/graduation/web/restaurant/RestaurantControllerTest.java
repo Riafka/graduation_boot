@@ -22,7 +22,7 @@ class RestaurantControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.get(REST_URL))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(RESTAURANT_TO_MATCHER.contentJson(blueLagoonTo, krustyKrabsTo, mcDonaldsTo, rigaTo, sulikoTo));
+                .andExpect(RESTAURANT_MATCHER.contentJson(blueLagoon, krustyKrabs, mcDonalds, riga, suliko));
     }
 
     @Test
@@ -32,7 +32,7 @@ class RestaurantControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(RESTAURANT_WITH_MENUS_MATCHER.contentJson(blueLagoonWithMenu, krustyKrabsWithMenu, mcDonaldsWithMenu, rigaWithMenu, sulikoWithMenu));
+                .andExpect(RESTAURANT_TO_MATCHER.contentJson(blueLagoonWithMenu, krustyKrabsWithMenu, mcDonaldsWithMenu, rigaWithMenu, sulikoWithMenu));
     }
 
     @Test
@@ -43,7 +43,7 @@ class RestaurantControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 // https://jira.spring.io/browse/SPR-14472
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(RESTAURANT_TO_MATCHER.contentJson(krustyKrabsTo));
+                .andExpect(RESTAURANT_MATCHER.contentJson(krustyKrabs));
     }
 
     @Test

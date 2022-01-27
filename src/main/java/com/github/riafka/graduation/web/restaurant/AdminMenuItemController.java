@@ -3,9 +3,6 @@ package com.github.riafka.graduation.web.restaurant;
 import com.github.riafka.graduation.model.MenuItem;
 import com.github.riafka.graduation.repository.MenuItemRepository;
 import com.github.riafka.graduation.repository.RestaurantRepository;
-import com.github.riafka.graduation.to.MenuItemTo;
-import com.github.riafka.graduation.to.RestaurantTo;
-import com.github.riafka.graduation.util.MenuItemUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,7 +25,6 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.github.riafka.graduation.util.validation.ValidationUtil.*;
 
@@ -49,10 +45,8 @@ public class AdminMenuItemController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete menu item by restaurant_id and id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Menu item deleted",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = RestaurantTo.class))}),
-            @ApiResponse(responseCode = "422", description = "Menu not found",
+            @ApiResponse(responseCode = "204", description = "Menu item deleted"),
+            @ApiResponse(responseCode = "422", description = "Menu item not found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
     public void delete(@Parameter(description = "id of menu item to be deleted") @PathVariable int id,
                        @Parameter(description = "id of restaurant by which menu item to be deleted")
@@ -65,9 +59,7 @@ public class AdminMenuItemController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete menu items by restaurant_id and date")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Menu items deleted",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = RestaurantTo.class))}),
+            @ApiResponse(responseCode = "204", description = "Menu items deleted"),
             @ApiResponse(responseCode = "422", description = "Menu items not found",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
     public void deleteByRestaurantIdAndMenuDate(@Parameter(description = "id of restaurant by which menu items to be deleted")
@@ -78,24 +70,24 @@ public class AdminMenuItemController {
     }
 
     @Transactional
-    @PostMapping(value = REST_URL_WITHOUT_ID, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = REST_URL_RESTAURANT_ID, consumes = MediaType.APPLICATION_JSON_VALUE)
     @Operation(summary = "Create menu item")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Menu items created",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = MenuItemTo.class))}),
+                            schema = @Schema(implementation = MenuItem.class))}),
             @ApiResponse(responseCode = "422", description = "{Menu item validation error, Menu item must be new}",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
-    public ResponseEntity<MenuItemTo> createWithLocation(@Valid @RequestBody MenuItemTo menuItemTo) {
-        log.info("create {}", menuItemTo);
-        checkNew(menuItemTo);
-        MenuItem menuItem = MenuItemUtil.createFromTo(menuItemTo);
-        menuItem.setRestaurant(restaurantRepository.getById(menuItemTo.getRestaurantId()));
+    public ResponseEntity<MenuItem> createWithLocation(@Valid @RequestBody MenuItem menuItem,
+                                                       @PathVariable(name = "restaurant_id") int restaurantId) {
+        log.info("create {}", menuItem);
+        checkNew(menuItem);
+        menuItem.setRestaurant(restaurantRepository.getById(restaurantId));
         MenuItem created = repository.save(menuItem);
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
                 .path(REST_URL + "/{id}")
-                .buildAndExpand(menuItemTo.getRestaurantId(), created.getId()).toUri();
-        return ResponseEntity.created(uriOfNewResource).body(MenuItemUtil.createTo(created));
+                .buildAndExpand(restaurantId, created.getId()).toUri();
+        return ResponseEntity.created(uriOfNewResource).body((created));
     }
 
     @Transactional
@@ -103,45 +95,39 @@ public class AdminMenuItemController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Update menu item by restaurant_id and id")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Menu item updated",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE)}),
+            @ApiResponse(responseCode = "204", description = "Menu item updated"),
             @ApiResponse(responseCode = "409", description = "Menu item doesn't belong to restaurant",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)),
             @ApiResponse(responseCode = "422", description = "{Menu item validation error}",
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))})
-    public void update(@Valid @RequestBody MenuItemTo menuItemTo,
+    public void update(@Valid @RequestBody MenuItem menuItem,
                        @Parameter(description = "id of menu item to be updated") @PathVariable int id,
                        @Parameter(description = "id of restaurant by which menu item to be updated")
                        @PathVariable(name = "restaurant_id") int restaurantId) {
-        log.info("update {} with id={},restaurant_id={}", menuItemTo, id, restaurantId);
-        assureIdConsistent(menuItemTo, id);
+        log.info("update {} with id={},restaurant_id={}", menuItem, id, restaurantId);
+        assureIdConsistent(menuItem, id);
         repository.checkBelong(id, restaurantId);
-        MenuItem menuItem = MenuItemUtil.createFromTo(menuItemTo);
         menuItem.setRestaurant(restaurantRepository.getById(restaurantId));
         repository.save(menuItem);
     }
 
     @GetMapping(REST_URL_RESTAURANT_ID + "/{id}")
     @Operation(summary = "Get menu_item by restaurant_id and id")
-    public MenuItemTo get(
+    public MenuItem get(
             @PathVariable(name = "restaurant_id")
             @Parameter(description = "id of restaurant by which menu is searched") int restaurantId,
             @PathVariable @Parameter(description = "id of menu to be searched") int id) {
         log.info("get menuItems by restaurant_id={}, id={}", restaurantId, id);
-        MenuItem menuItem = checkNotFoundOptional(repository.get(id, restaurantId), "restaurant_id=" + restaurantId + " id=" + id);
-        return MenuItemUtil.createTo(menuItem);
+        return checkNotFoundOptional(repository.get(id, restaurantId), "restaurant_id=" + restaurantId + " id=" + id);
     }
 
     @GetMapping(REST_URL_RESTAURANT_ID)
     @Operation(summary = "Get menu_items by restaurant_id and menuDate")
-    public List<MenuItemTo> getByRestaurantIdAndDate(
+    public List<MenuItem> getByRestaurantIdAndDate(
             @PathVariable(name = "restaurant_id")
             @Parameter(description = "id of restaurant by which menus is searched") int restaurantId,
             @RequestParam @Nullable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate menuDate) {
         log.info("get menuItems by restaurant_id={} and menuDate={}", restaurantId, menuDate);
-        return repository.getAllByRestaurantId(restaurantId, menuDate)
-                .stream()
-                .map(MenuItemUtil::createTo)
-                .collect(Collectors.toList());
+        return repository.getAllByRestaurantId(restaurantId, menuDate);
     }
 }
