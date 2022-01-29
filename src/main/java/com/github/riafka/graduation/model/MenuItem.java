@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "menu_item", uniqueConstraints = @UniqueConstraint(columnNames = {"restaurant_id", "name", "menu_date"}, name = "unique_name_menu_date_idx"))
+@Table(name = "menu_item", uniqueConstraints = @UniqueConstraint(columnNames = {"restaurant_id", "menu_date", "name"}, name = "unique_name_menu_date_idx"))
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
