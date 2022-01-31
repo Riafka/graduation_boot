@@ -1,6 +1,7 @@
 package com.github.riafka.graduation.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,6 +20,7 @@ public class MenuItem extends NamedEntity {
     @JoinColumn(name = "restaurant_id", nullable = false)
     @JsonBackReference
     @ToString.Exclude
+    @Hidden
     private Restaurant restaurant;
 
     @Column(nullable = false)

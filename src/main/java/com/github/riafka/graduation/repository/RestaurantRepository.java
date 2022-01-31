@@ -11,8 +11,12 @@ import java.util.List;
 
 @Transactional(readOnly = true)
 public interface RestaurantRepository extends BaseRepository<Restaurant> {
-    @Query("SELECT DISTINCT r FROM Restaurant r JOIN FETCH r.menuItems rm where rm.menuDate =:date order by r.name asc, r.id, rm.name")
+    @Query("SELECT DISTINCT r FROM Restaurant r JOIN FETCH r.menuItems rm WHERE rm.menuDate =:date ORDER BY r.name asc, r.id, rm.name")
     List<Restaurant> getAllWithMenu(LocalDate date);
+
+    @Query("SELECT DISTINCT r FROM Restaurant r JOIN FETCH r.menuItems rm" +
+            " WHERE r.id =:restaurantId AND rm.menuDate =:date ORDER BY r.name asc, r.id, rm.name")
+    Restaurant getWithMenuByIdAndDate(int restaurantId, LocalDate date);
 
     @Override
     @Transactional

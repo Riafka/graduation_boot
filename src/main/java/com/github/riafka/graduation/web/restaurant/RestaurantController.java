@@ -42,6 +42,13 @@ public class RestaurantController extends AbstractRestaurantController {
         return super.get(id);
     }
 
+    @GetMapping("/menu-for-today/{id}")
+    @Operation(summary = "Get restaurant with actual menu items by id")
+    public RestaurantTo getWithMenuItems(@PathVariable @Parameter(description = "id of restaurant to be searched") int id) {
+        return RestaurantUtil.createTo(repository.getWithMenuByIdAndDate(id, LocalDate.now()));
+    }
+
+
     @GetMapping("/menu-for-today")
     @Operation(summary = "Get all restaurants with actual menu")
     @Cacheable("restaurants_with_menu")

@@ -27,7 +27,7 @@ class RestaurantControllerTest extends AbstractControllerTest {
 
     @Test
     @WithUserDetails(value = USER_MAIL)
-    void getAllWithMenus() throws Exception {
+    void getAllWithMenu() throws Exception {
         perform(MockMvcRequestBuilders.get(REST_URL + "/menu-for-today"))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -54,4 +54,13 @@ class RestaurantControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity());
     }
 
+    @Test
+    @WithUserDetails(value = USER_MAIL)
+    void getWithMenuItems() throws Exception {
+        perform(MockMvcRequestBuilders.get(REST_URL + "/menu-for-today/" + BLUE_LAGOON_ID))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(RESTAURANT_TO_MATCHER.contentJson(blueLagoonWithMenu));
+    }
 }

@@ -26,8 +26,7 @@ import static com.github.riafka.graduation.web.restaurant.RestaurantTestData.KRU
 import static com.github.riafka.graduation.web.restaurant.RestaurantTestData.MC_DONALDS_ID;
 import static com.github.riafka.graduation.web.user.UserTestData.*;
 import static com.github.riafka.graduation.web.vote.ProfileVoteController.TIME_ERROR;
-import static com.github.riafka.graduation.web.vote.VoteTestData.VOTE_TO_MATCHER;
-import static com.github.riafka.graduation.web.vote.VoteTestData.user_vote;
+import static com.github.riafka.graduation.web.vote.VoteTestData.*;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -35,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class ProfileVoteControllerTest extends AbstractControllerTest {
 
-    private static final String REST_URL = ProfileVoteController.REST_URL + '/';
+    private static final String REST_URL = ProfileVoteController.REST_URL + ProfileVoteController.REST_URL_TODAY + '/';
 
     @Autowired
     private VoteRepository voteRepository;
@@ -86,7 +85,7 @@ class ProfileVoteControllerTest extends AbstractControllerTest {
 
     @Test
     @WithUserDetails(value = USER_MAIL)
-    void get() throws Exception {
+    void getForToday() throws Exception {
         perform(MockMvcRequestBuilders.get(REST_URL))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -96,7 +95,7 @@ class ProfileVoteControllerTest extends AbstractControllerTest {
 
     @Test
     @WithUserDetails(value = USER_2_MAIL)
-    void getNotFound() throws Exception {
+    void getForTodayNotFound() throws Exception {
         perform(MockMvcRequestBuilders.get(REST_URL))
                 .andExpect(status().isUnprocessableEntity())
                 .andDo(print())
@@ -145,5 +144,15 @@ class ProfileVoteControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().string(containsString("Not found entity with userId=" + USER_ID_2)));
+    }
+
+    @Test
+    @WithUserDetails(value = USER_MAIL)
+    void getHistory() throws Exception {
+        perform(MockMvcRequestBuilders.get(ProfileVoteController.REST_URL + '/'))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(VOTE_TO_MATCHER.contentJson(user_vote, user_vote_1day_old, user_vote_2days_old));
     }
 }

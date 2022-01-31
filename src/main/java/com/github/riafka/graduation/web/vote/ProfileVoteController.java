@@ -30,6 +30,8 @@ import java.net.URI;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.riafka.graduation.util.validation.ValidationUtil.checkNotFoundOptional;
 
@@ -39,9 +41,10 @@ import static com.github.riafka.graduation.util.validation.ValidationUtil.checkN
 @Slf4j
 @Tag(name = "Profile Vote Controller", description = "Operations with own vote")
 public class ProfileVoteController {
-    public static final String REST_URL = "/api/profile/vote";
+    public static final String REST_URL = "/api/profile/votes";
+    public static final String REST_URL_TODAY = "/for-today";
     public static final String TIME_ERROR = "It is too late, vote can't be changed";
-    public static final LocalTime ELEVEN_HOURS = LocalTime.of(11, 0, 0);
+    public static final LocalTime DEAD_LINE = LocalTime.of(11, 0, 0);
 
     private final VoteRepository voteRepository;
 
@@ -56,17 +59,26 @@ public class ProfileVoteController {
     }
 
     @GetMapping
-    @Operation(summary = "Get vote")
-    public VoteTo get(@AuthenticationPrincipal AuthUser authUser) {
+    @Operation(summary = "Get votes history")
+    public List<VoteTo> getHistory(@AuthenticationPrincipal AuthUser authUser) {
+        log.info("get votes history for user {}", authUser.id());
+        return voteRepository.findByUserId(authUser.id()).stream()
+                .map(VoteUtil::createTo)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping(REST_URL_TODAY)
+    @Operation(summary = "Get vote for today")
+    public VoteTo getForToday(@AuthenticationPrincipal AuthUser authUser) {
         log.info("get vote for user {}", authUser.id());
         Vote vote = checkNotFoundOptional(voteRepository.findByUserIdAndDate(authUser.id(), LocalDate.now()),
                 "userId=" + authUser.id() + " voteDate=" + LocalDate.now());
         return VoteUtil.createTo(vote);
     }
 
-    @PostMapping
+    @PostMapping(REST_URL_TODAY)
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Create vote by restaurant_id")
+    @Operation(summary = "Create vote for today by restaurant_id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Vote created",
                     content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -86,10 +98,10 @@ public class ProfileVoteController {
         return ResponseEntity.created(uriOfNewResource).body(VoteUtil.createTo(created));
     }
 
-    @PutMapping
+    @PutMapping(REST_URL_TODAY)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
-    @Operation(summary = "Update vote by restaurant_id")
+    @Operation(summary = "Update vote for today by restaurant_id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Vote updated",
                     content = @Content),
@@ -102,7 +114,7 @@ public class ProfileVoteController {
         Restaurant restaurant = restaurantRepository.getById(restaurantId);
         Vote vote = checkNotFoundOptional(voteRepository.findByUserIdAndDate(authUser.id(), LocalDate.now()),
                 "userId=" + authUser.id() + " voteDate=" + LocalDate.now());
-        if (LocalTime.now(clock).isAfter(ELEVEN_HOURS)) {
+        if (LocalTime.now(clock).isAfter(DEAD_LINE)) {
             log.info(TIME_ERROR);
             throw new IllegalRequestDataException(TIME_ERROR);
         }
