@@ -29,3 +29,4 @@ java -jar target/graduation-0.0.1-SNAPSHOT.jar
 * admin@gmail.com / admin
 
 [Swagger REST API](http://localhost:8080/swagger-ui/index.html)
+TEST
